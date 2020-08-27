@@ -24,24 +24,36 @@ describe('Installing IBM Cloud CLI', () => {
           'cloud-api-key': 'cloud-api-key-foo',
           'cf-org': 'cf-org-foo',
           'cf-space': 'cf-space-foo',
+          'cf-api': 'https://cloud.ibm.com',
         }[name])
     );
     await login();
-    expect(exec).toHaveBeenCalledWith(
+    expect(exec).toHaveBeenNthCalledWith(1, 'ibmcloud', ['login', '-u', 'apikey', '-p', 'cloud-api-key-foo'], execOptions);
+    expect(exec).toHaveBeenNthCalledWith(
+      2,
       'ibmcloud',
-      [
-        'login',
-        '-a',
-        'https://cloud.ibm.com',
-        '-u',
-        'apikey',
-        '-p',
-        'cloud-api-key-foo',
-        '-o',
-        'cf-org-foo',
-        '-s',
-        'cf-space-foo',
-      ],
+      ['target', '-o', 'cf-org-foo', '-s', 'cf-space-foo', '--cf-api', 'https://cloud.ibm.com'],
+      execOptions
+    );
+  });
+
+  it('runs the right set of commands with CF group specified', async () => {
+    getInput.mockImplementation(
+      (name) =>
+        ({
+          'cloud-api-key': 'cloud-api-key-foo',
+          'cf-org': 'cf-org-foo',
+          'cf-space': 'cf-space-foo',
+          'cf-group': 'cf-group-foo',
+          'cf-api': 'https://cloud.ibm.com',
+        }[name])
+    );
+    await login();
+    expect(exec).toHaveBeenNthCalledWith(1, 'ibmcloud', ['login', '-u', 'apikey', '-p', 'cloud-api-key-foo'], execOptions);
+    expect(exec).toHaveBeenNthCalledWith(
+      2,
+      'ibmcloud',
+      ['target', '-o', 'cf-org-foo', '-s', 'cf-space-foo', '-g', 'cf-group-foo', '--cf-api', 'https://cloud.ibm.com'],
       execOptions
     );
   });
@@ -54,26 +66,15 @@ describe('Installing IBM Cloud CLI', () => {
           'cf-org': 'cf-org-foo',
           'cf-space': 'cf-space-foo',
           'cf-region': 'cf-region-foo',
+          'cf-api': 'https://cloud.ibm.com',
         }[name])
     );
     await login();
-    expect(exec).toHaveBeenCalledWith(
+    expect(exec).toHaveBeenNthCalledWith(1, 'ibmcloud', ['login', '-u', 'apikey', '-p', 'cloud-api-key-foo'], execOptions);
+    expect(exec).toHaveBeenNthCalledWith(
+      2,
       'ibmcloud',
-      [
-        'login',
-        '-a',
-        'https://cloud.ibm.com',
-        '-u',
-        'apikey',
-        '-p',
-        'cloud-api-key-foo',
-        '-o',
-        'cf-org-foo',
-        '-s',
-        'cf-space-foo',
-        '-r',
-        'cf-region-foo',
-      ],
+      ['target', '-o', 'cf-org-foo', '-s', 'cf-space-foo', '-r', 'cf-region-foo', '--cf-api', 'https://cloud.ibm.com'],
       execOptions
     );
   });

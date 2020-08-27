@@ -5,19 +5,27 @@ inputs:
     description: 'IBM Cloud API key'
     required: true
   cf-org:
-    description: 'CloudFoundry org'
+    description: 'Cloud Foundry org'
     required: true
   cf-space:
-    description: 'CloudFoundry space'
+    description: 'Cloud Foundry space'
     required: true
-  cf-region:
-    description: 'CloudFoundry region'
+  cf-group:
+    description: 'Resource Group Name or ID'
     required: false
+  cf-api:
+    description: 'Cloud Foundry API endpoint'
+    required: false
+    default: 'https://cloud.ibm.com'
+  cf-region:
+    description: 'Cloud Foundry region'
+    required: false
+    default: 'us-south'
   cf-app:
-    description: 'CloudFoundry application name'
+    description: 'Cloud Foundry application name'
     required: true
   cf-manifest:
-    description: 'CloudFoundry manifest file'
+    description: 'Cloud Foundry manifest file'
     required: false
   deploy-dir:
     description: 'The root directory to deploy'

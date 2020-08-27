@@ -1397,7 +1397,6 @@ module.exports = require("https");
 const { getInput, setFailed } = __webpack_require__(470);
 const { exec } = __webpack_require__(986);
 const execOptions = __webpack_require__(985);
-const run = __webpack_require__(861);
 
 /**
  * Deploys a CF app to IBM Cloud.
@@ -1407,16 +1406,10 @@ async function deploy() {
   const deployDir = getInput('deploy-dir');
   try {
     const manifestFile = getInput('cf-manifest');
-    await run('ibmcloud cf add-plugin-repo CF-Community https://plugins.cloudfoundry.org', execOptions);
-    await run('ibmcloud cf install-plugin blue-green-deploy -f -r CF-Community', execOptions);
-    await exec(
-      'ibmcloud',
-      ['cf', 'blue-green-deploy', cfApp, ...(!manifestFile ? [] : ['-f', manifestFile]), '--delete-old-apps'],
-      {
-        ...execOptions,
-        cwd: deployDir,
-      }
-    );
+    await exec('ibmcloud', ['cf', 'push', cfApp, ...(!manifestFile ? [] : ['-f', manifestFile]), '--strategy', 'rolling'], {
+      ...execOptions,
+      cwd: deployDir,
+    });
   } catch (error) {
     setFailed(`Deploying ${cfApp} to IBM Cloud failed: ${error.stack}`);
     throw error;
@@ -1571,26 +1564,12 @@ async function login() {
     const cloudAPIKey = getInput('cloud-api-key');
     const org = getInput('cf-org');
     const space = getInput('cf-space');
+    const group = getInput('cf-group');
     const region = getInput('cf-region');
+    const api = getInput('cf-api');
     setSecret(cloudAPIKey);
-    await exec(
-      'ibmcloud',
-      [
-        'login',
-        '-a',
-        'https://cloud.ibm.com',
-        '-u',
-        'apikey',
-        '-p',
-        cloudAPIKey,
-        '-o',
-        org,
-        '-s',
-        space,
-        ...(!region ? [] : ['-r', region]),
-      ],
-      execOptions
-    );
+    await exec('ibmcloud', ['login', '-a', api, '-u', 'apikey', '-p', cloudAPIKey, '-r', region], execOptions);
+    await exec('ibmcloud', ['target', '-o', org, '-s', space, ...(!group ? [] : ['-g', group])], execOptions);
   } catch (error) {
     setFailed(`Logging into IBM Cloud failed: ${error.stack}`);
     throw error;
@@ -4666,7 +4645,7 @@ async function install() {
   try {
     const cliPath = await downloadTool('https://clis.cloud.ibm.com/install/linux');
     await exec('bash', [cliPath], execOptions);
-    await run('ibmcloud cf install', execOptions);
+    await run('ibmcloud cf install -v 6.51.0 --force', execOptions);
   } catch (error) {
     setFailed(`Error installing IBM Cloud CLI: ${error.stack}`);
     throw error;
